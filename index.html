@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNU Athletics — Game Day Scheduler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --crimson:#A90533; --crimson-dk:#7d0325; --crimson-bg:#fdf0f2;
+  --gray:#BCBEC0; --gray-dk:#7a7c7e; --gray-md:#dddfe1; --gray-lt:#f4f4f5;
+  --ink:#1a1a1a; --ink-soft:#505254; --white:#ffffff;
+  --green:#1e6b3c; --green-bg:#d9f0e4;
+  --blue:#1a4e8a;  --blue-bg:#d6e8f8;
+  --amber:#8a4a00; --amber-bg:#fde8cc;
+  --fd:'Oswald',sans-serif; --fb:'Source Sans 3',sans-serif;
+  --r:6px; --rlg:10px; --shadow:0 2px 14px rgba(0,0,0,.09);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fb);background:var(--gray-lt);color:var(--ink);font-size:15px;min-height:100vh}
+
+/* ── HEADER ── */
+.hdr{background:var(--crimson);padding:0 2rem;display:flex;align-items:center;gap:14px;border-bottom:4px solid var(--crimson-dk);box-shadow:0 2px 10px rgba(169,5,51,.3);position:sticky;top:0;z-index:200}
+.hdr-icon{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin:10px 0}
+.hdr-text{flex:1}
+.hdr-text h1{font-family:var(--fd);font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--white);line-height:1.1}
+.hdr-text p{font-size:11px;color:rgba(255,255,255,.65);letter-spacing:.8px;text-transform:uppercase;margin-top:1px}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1060px;margin:0 auto;padding:1.75rem 1.5rem}
+
+/* ── FILTER CARD ── */
+.filter-card{background:var(--white);border-radius:var(--rlg);box-shadow:var(--shadow);padding:1.25rem 1.5rem;margin-bottom:1rem}
+.filter-card-title{font-family:var(--fd);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray-dk);margin-bottom:.875rem}
+.filter-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.filter-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:180px}
+.filter-label{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--gray-dk)}
+.filter-field select{font-family:var(--fb);font-size:14px;color:var(--ink);background:var(--white);border:1.5px solid var(--gray-md);border-radius:var(--r);padding:9px 10px;width:100%;outline:none;transition:border-color .15s;cursor:pointer}
+.filter-field select:focus{border-color:var(--crimson)}
+.btn-clear{font-family:var(--fd);font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:9px 16px;border-radius:var(--r);border:2px solid var(--gray-md);background:transparent;color:var(--ink-soft);cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-clear:hover{border-color:var(--crimson);color:var(--crimson)}
+
+/* ── RESULTS HEADER ── */
+.results-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:1rem}
+.results-title{font-family:var(--fd);font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft)}
+.vtoggle{display:flex;border:1.5px solid var(--gray-md);border-radius:var(--r);overflow:hidden}
+.vtoggle button{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;padding:6px 13px;background:var(--white);border:none;color:var(--gray-dk);cursor:pointer;transition:all .15s}
+.vtoggle button.on{background:var(--crimson);color:var(--white)}
+.vtoggle button:not(.on):hover{background:var(--crimson-bg);color:var(--crimson)}
+
+/* ── MAIN PANEL ── */
+.panel{background:var(--white);border-radius:var(--rlg);box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1rem}
+
+/* ── STATE MESSAGES ── */
+.state-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;gap:.75rem;color:var(--gray-dk)}
+.spinner{width:32px;height:32px;border:3px solid var(--gray-md);border-top-color:var(--crimson);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.state-msg p{font-size:14px;text-align:center;max-width:380px;line-height:1.5}
+.state-msg .retry-btn{margin-top:.5rem;padding:8px 18px;background:var(--crimson);color:#fff;border:none;border-radius:var(--r);font-family:var(--fd);font-size:13px;font-weight:600;text-transform:uppercase;cursor:pointer;letter-spacing:.4px}
+.state-msg .retry-btn:hover{background:var(--crimson-dk)}
+
+/* ── GAME SECTION LABEL ── */
+.game-section-label{font-family:var(--fd);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray-dk);padding-bottom:6px;border-bottom:1.5px solid var(--gray-md);margin-bottom:.875rem;margin-top:1.25rem}
+.game-section-label:first-child{margin-top:0}
+
+/* ── CARD VIEW ── */
+.game-card{border:2px solid var(--gray-md);border-radius:var(--rlg);margin-bottom:.875rem;overflow:hidden;transition:border-color .15s}
+.game-card.has-mine{border-color:var(--crimson)}
+.gc-head{background:var(--gray-lt);padding:.875rem 1.25rem;display:flex;align-items:baseline;gap:.75rem;flex-wrap:wrap;border-bottom:1.5px solid var(--gray-md)}
+.gc-head.has-mine{background:var(--crimson-bg);border-bottom-color:rgba(169,5,51,.2)}
+.gc-opp{font-family:var(--fd);font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink);flex:1}
+.gc-meta{font-size:12px;color:var(--gray-dk)}
+.gc-body{display:flex;flex-wrap:wrap;gap:10px;padding:1rem 1.25rem}
+.assign-card{flex:1;min-width:155px;max-width:220px;border:1.5px solid var(--gray-md);border-radius:var(--r);padding:9px 12px;background:var(--white)}
+.assign-card.mine{border-color:var(--crimson);background:var(--crimson-bg)}
+.ac-pos{font-size:12px;font-weight:600;color:var(--ink);line-height:1.2}
+.ac-name{font-size:12px;color:var(--gray-dk);margin-top:2px;font-style:italic}
+.ac-name.unassigned{color:var(--gray)}
+.ac-time{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--crimson);margin-top:5px;line-height:1}
+.ac-time.tbd{font-size:13px;font-weight:500;color:var(--gray-dk);font-family:var(--fb)}
+.ac-badge{margin-top:5px}
+
+/* ── TABLE VIEW ── */
+.tbl-wrap{border:1.5px solid var(--gray-md);border-radius:var(--rlg);overflow:hidden;margin-bottom:.875rem}
+.sched-tbl{width:100%;border-collapse:collapse}
+.sched-tbl thead th{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--gray-dk);background:var(--gray-lt);padding:9px 14px;text-align:left;border-bottom:1.5px solid var(--gray-md)}
+.sched-tbl tbody tr{border-bottom:1px solid var(--gray-md);transition:background .1s}
+.sched-tbl tbody tr:last-child{border-bottom:none}
+.sched-tbl tbody tr:hover{background:var(--crimson-bg)}
+.sched-tbl tbody tr.mine-row{background:var(--crimson-bg)}
+.sched-tbl tbody tr.mine-row td:first-child{border-left:3px solid var(--crimson)}
+.sched-tbl td{padding:10px 14px;font-size:13px;vertical-align:middle}
+.td-opp{font-weight:600;font-size:14px}
+.td-sub{font-size:11px;color:var(--gray-dk);margin-top:2px}
+.td-pos{font-weight:600}
+.td-worker{color:var(--ink-soft)}
+.td-worker.unassigned{color:var(--gray);font-style:italic}
+.td-arrive{font-family:var(--fd);font-size:17px;font-weight:700;color:var(--ink)}
+.td-arrive.mine-time{color:var(--crimson)}
+.td-arrive.tbd{font-size:13px;font-weight:400;color:var(--gray-dk);font-family:var(--fb)}
+
+/* ── BADGES ── */
+.badge{display:inline-block;font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;padding:2px 7px;border-radius:4px}
+.b-red{background:#fad8d8;color:var(--crimson)}
+.b-amber{background:var(--amber-bg);color:var(--amber)}
+.b-blue{background:var(--blue-bg);color:var(--blue)}
+.b-green{background:var(--green-bg);color:var(--green)}
+
+/* ── SPORT TAG ── */
+.sport-tag{display:inline-block;font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.tag-soccer{background:#d9f0e4;color:#1e6b3c}
+.tag-volleyball{background:#d6e8f8;color:#1a4e8a}
+.tag-football{background:#fde8cc;color:#8a4a00}
+.tag-basketball{background:#ede8fa;color:#4a1a8a}
+.tag-rugby{background:#fdf0f2;color:var(--crimson)}
+.tag-baseball{background:#d9f0e4;color:#1e6b3c}
+.tag-softball{background:#fde8cc;color:#8a4a00}
+.tag-other{background:var(--gray-md);color:var(--gray-dk)}
+
+/* ── REFRESH ── */
+.refresh-row{text-align:right;font-size:11px;color:var(--gray-dk);margin-top:.5rem;padding-right:.25rem}
+.refresh-btn{background:none;border:none;color:var(--crimson);font-size:11px;cursor:pointer;font-family:var(--fb);text-decoration:underline;padding:0;margin-left:6px}
+
+/* ── EMPTY ── */
+.empty-msg{text-align:center;padding:2.5rem 1rem;font-size:14px;color:var(--gray-dk)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .wrap{padding:1rem}
+  .hdr{padding:0 1rem}
+  .panel{padding:1rem}
+  .filter-card{padding:1rem}
+  .assign-card{min-width:140px}
+  .sched-tbl thead th:nth-child(5),
+  .sched-tbl td:nth-child(5){display:none}
+}
+
+/* ── PRINT ── */
+@media print{
+  .hdr,.filter-card,.results-bar,.refresh-row{display:none!important}
+  .panel{box-shadow:none;border-radius:0;padding:0}
+  .badge{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-icon" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <circle cx="11" cy="11" r="8.5" stroke="white" stroke-width="2"/>
+      <path d="M11 5v6l4 2.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="hdr-text">
+    <h1>SNU Athletics</h1>
+    <p>Game Day Staff Scheduler — 26–27</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- FILTER CARD -->
+  <div class="filter-card">
+    <div class="filter-card-title">Find your schedule</div>
+    <div class="filter-row">
+      <div class="filter-field">
+        <label class="filter-label" for="sportSel">Sport</label>
+        <select id="sportSel" onchange="onFilterChange()">
+          <option value="">— All sports —</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="workerSel">Worker name</label>
+        <select id="workerSel" onchange="onFilterChange()">
+          <option value="">— All workers —</option>
+        </select>
+      </div>
+      <button class="btn-clear" onclick="clearFilters()">Clear filters</button>
+    </div>
+  </div>
+
+  <!-- RESULTS HEADER -->
+  <div class="results-bar" id="resultsBar" style="display:none">
+    <span class="results-title" id="resultsTitle"></span>
+    <div class="vtoggle">
+      <button id="vtCard" class="on" onclick="setView('card')">&#9647; Cards</button>
+      <button id="vtTable" onclick="setView('table')">&#9776; Table</button>
+    </div>
+  </div>
+
+  <!-- MAIN PANEL -->
+  <div class="panel" id="mainPanel">
+    <div class="state-msg" id="initMsg">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+        <circle cx="18" cy="18" r="14" stroke="#BCBEC0" stroke-width="2.5"/>
+        <path d="M18 9v9l5 3" stroke="#BCBEC0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p>Select a sport or worker name above to view the arrival schedule.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   SPORT DATA SOURCES
+   ════════════════════════════════════════════ */
+const SPORTS = [
+  { label:"Women's Soccer",    gid:"0" },
+  { label:"Men's Soccer",      gid:"1015410633" },
+  { label:"Volleyball",        gid:"971938409" },
+  { label:"Football",          gid:"1214538622" },
+  { label:"Men's Basketball",  gid:"1109526714" },
+  { label:"Women's Basketball",gid:"528085348" },
+  { label:"Baseball",          gid:"36202340" },
+  { label:"Softball",          gid:"1232068872" },
+  { label:"Men's Rugby",       gid:"1275727010" },
+  { label:"Women's Rugby",     gid:"1280706141" },
+];
+
+const BASE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRe5hngccHSK9hhYFRylTBAGeyfzMLQsGoCzop7zxVC9D7wKtwxKYS9WvK5nKt1_MfUddh5NrL3-O0t/pub";
+
+function sheetUrl(gid) {
+  return `${BASE_URL}?gid=${gid}&single=true&output=csv`;
+}
+
+// CORS proxy chain — try each in order until one works
+const PROXIES = [
+  url => url,                                                                     // direct (works if same origin or CORS allowed)
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://cors-anywhere.herokuapp.com/${url}`,
+];
+
+/* ════════════════════════════════════════════
+   STATE
+   ════════════════════════════════════════════ */
+let cache       = {};   // gid -> parsed data
+let allParsed   = {};   // gid -> parsed data (same as cache, kept for worker list)
+let viewMode    = "card";
+let filterSport = "";
+let filterWorker= "";
+let loadingGids = new Set();
+let allWorkers  = new Set();
+
+/* ════════════════════════════════════════════
+   CSV PARSER
+   ════════════════════════════════════════════ */
+function parseCSV(text) {
+  const rows = [];
+  let cur = [], field = "", inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c==='"' && text[i+1]==='"') { field+='"'; i++; }
+      else if (c==='"') inQ = false;
+      else field += c;
+    } else {
+      if      (c==='"') inQ = true;
+      else if (c===',') { cur.push(field.trim()); field=""; }
+      else if (c==='\n'||c==='\r') {
+        cur.push(field.trim()); if(cur.some(f=>f)) rows.push(cur);
+        cur=[]; field="";
+        if (c==='\r' && text[i+1]==='\n') i++;
+      } else field += c;
+    }
+  }
+  if (field||cur.some(f=>f)) { cur.push(field.trim()); rows.push(cur); }
+  return rows;
+}
+
+function parseSheet(csvText, sportLabel) {
+  const rows = parseCSV(csvText);
+  if (!rows.length) return null;
+
+  // Row 0 = headers: Date, Time, Opponent, [Position...], ...
+  const headers = rows[0].map(h => h.trim());
+  // Positions start at col 3 (index 3+)
+  const positions = headers.slice(3).filter(Boolean);
+  if (!positions.length) return null;
+
+  // Find the "Arrival Time" divider row (col C / index 2 contains "arrival")
+  let dividerIdx = -1;
+  for (let i = 1; i < rows.length; i++) {
+    const c2 = (rows[i][2] || "").toLowerCase().trim();
+    if (c2.includes("arrival")) { dividerIdx = i; break; }
+  }
+
+  // Parse arrival minutes (row after divider)
+  const arrivalMins = {};
+  if (dividerIdx !== -1 && rows[dividerIdx + 1]) {
+    const aRow = rows[dividerIdx + 1];
+    positions.forEach((pos, pi) => {
+      const raw = (aRow[3 + pi] || "").trim();
+      const v   = parseFloat(raw);
+      if (!isNaN(v)) arrivalMins[pos] = v;
+    });
+  }
+
+  // Parse games (rows 1 .. divider-1, or all if no divider)
+  const endIdx = dividerIdx !== -1 ? dividerIdx : rows.length;
+  const games  = [];
+  for (let i = 1; i < endIdx; i++) {
+    const row  = rows[i];
+    const date = (row[0] || "").trim();
+    const time = (row[1] || "").trim();
+    const opp  = (row[2] || "").trim();
+    // Skip blank rows, header repeats, or separator lines
+    if (!opp || !date) continue;
+    if (/^-+$/.test(opp) || /opponent/i.test(opp)) continue;
+
+    const workers = {};
+    positions.forEach((pos, pi) => {
+      const name = (row[3 + pi] || "").trim();
+      if (name) { workers[pos] = name; allWorkers.add(name); }
+    });
+    games.push({ date, time, opp, workers, sport: sportLabel });
+  }
+
+  return { positions, arrivalMins, games, sport: sportLabel };
+}
+
+/* ════════════════════════════════════════════
+   FETCH WITH PROXY FALLBACK
+   ════════════════════════════════════════════ */
+async function fetchWithFallback(url) {
+  for (const proxy of PROXIES) {
+    const proxyUrl = proxy(url);
+    try {
+      const resp = await fetch(proxyUrl, {
+        headers: { "Accept": "text/csv,text/plain,*/*" }
+      });
+      if (resp.ok) {
+        const text = await resp.text();
+        // Sanity check: Google returns HTML error pages sometimes
+        if (text.trim().startsWith("<!")) continue;
+        if (text.trim().length < 10) continue;
+        return text;
+      }
+    } catch (e) {
+      // try next proxy
+    }
+  }
+  return null;
+}
+
+async function loadSport(idx) {
+  const sport = SPORTS[idx];
+  if (cache[sport.gid]) return cache[sport.gid];
+  if (loadingGids.has(sport.gid)) return null;
+
+  loadingGids.add(sport.gid);
+  try {
+    const text = await fetchWithFallback(sheetUrl(sport.gid));
+    if (!text) return null;
+    const data = parseSheet(text, sport.label);
+    if (data) {
+      cache[sport.gid] = data;
+      populateWorkerDropdown();
+    }
+    return data;
+  } finally {
+    loadingGids.delete(sport.gid);
+  }
+}
+
+async function loadAllSports() {
+  const promises = SPORTS.map((s, i) => loadSport(i));
+  await Promise.allSettled(promises);
+  populateWorkerDropdown();
+  if (filterWorker || filterSport) render();
+}
+
+/* ════════════════════════════════════════════
+   HELPERS
+   ════════════════════════════════════════════ */
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") }
+
+function parseTime(raw) {
+  if (!raw || /tbd/i.test(raw.trim())) return null;
+  const s = raw.trim();
+  let m;
+  m = s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (m) { let h=+m[1],min=+m[2],ap=m[3].toUpperCase(); if(ap==="PM"&&h!==12)h+=12; if(ap==="AM"&&h===12)h=0; return{h,min}; }
+  m = s.match(/^(\d{1,2}):(\d{2})$/);
+  if (m) return{h:+m[1],min:+m[2]};
+  m = s.match(/^(\d{1,2})\s*(AM|PM)$/i);
+  if (m) { let h=+m[1],ap=m[2].toUpperCase(); if(ap==="PM"&&h!==12)h+=12; if(ap==="AM"&&h===12)h=0; return{h,min:0}; }
+  return null;
+}
+
+function fmtTime(h, min) {
+  const ap=h>=12?"PM":"AM", hr=h%12===0?12:h%12;
+  return hr+":"+String(min).padStart(2,"0")+" "+ap;
+}
+
+function arrivalTime(gameH, gameMin, minutesBefore) {
+  const norm = ((gameH*60+gameMin-minutesBefore)%1440+1440)%1440;
+  return{h:Math.floor(norm/60),min:norm%60};
+}
+
+function badgeClass(m){ return m>=90?"b-red":m>=60?"b-amber":m>=40?"b-blue":"b-green" }
+
+function tagClass(s){
+  if(s.includes("Soccer"))return"tag-soccer";
+  if(s.includes("Volleyball"))return"tag-volleyball";
+  if(s.includes("Football"))return"tag-football";
+  if(s.includes("Basketball"))return"tag-basketball";
+  if(s.includes("Rugby"))return"tag-rugby";
+  if(s==="Baseball")return"tag-baseball";
+  if(s==="Softball")return"tag-softball";
+  return"tag-other";
+}
+
+function fmtDate(raw) {
+  if (!raw) return "";
+  let m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (m) { let yr=+m[3]; if(yr<100)yr+=2000; return new Date(yr,+m[1]-1,+m[2]).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"}); }
+  m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"});
+  return raw;
+}
+
+function isPast(dateRaw) {
+  if (!dateRaw) return false;
+  const today = new Date(); today.setHours(0,0,0,0);
+  let m = dateRaw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (m) { let yr=+m[3]; if(yr<100)yr+=2000; return new Date(yr,+m[1]-1,+m[2])<today; }
+  m = dateRaw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return new Date(+m[1],+m[2]-1,+m[3])<today;
+  return false;
+}
+
+/* ════════════════════════════════════════════
+   DROPDOWNS
+   ════════════════════════════════════════════ */
+function populateSportDropdown() {
+  const sel = document.getElementById("sportSel");
+  sel.innerHTML = '<option value="">— All sports —</option>' +
+    SPORTS.map((s,i)=>`<option value="${i}">${esc(s.label)}</option>`).join("");
+}
+
+function populateWorkerDropdown() {
+  const sel   = document.getElementById("workerSel");
+  const cur   = sel.value;
+  const names = [...allWorkers].sort();
+  sel.innerHTML = '<option value="">— All workers —</option>' +
+    names.map(n=>`<option value="${esc(n)}"${n===cur?" selected":""}>${esc(n)}</option>`).join("");
+}
+
+/* ════════════════════════════════════════════
+   FILTER LOGIC
+   ════════════════════════════════════════════ */
+function onFilterChange() {
+  filterSport  = document.getElementById("sportSel").value;
+  filterWorker = document.getElementById("workerSel").value;
+  render();
+}
+
+function clearFilters() {
+  document.getElementById("sportSel").value  = "";
+  document.getElementById("workerSel").value = "";
+  filterSport = ""; filterWorker = "";
+  render();
+}
+
+function setView(mode) {
+  viewMode = mode;
+  document.getElementById("vtCard").className  = mode==="card"?"on":"";
+  document.getElementById("vtTable").className = mode==="table"?"on":"";
+  render();
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+   ════════════════════════════════════════════ */
+function render() {
+  const panel      = document.getElementById("mainPanel");
+  const resultsBar = document.getElementById("resultsBar");
+  const initMsg    = document.getElementById("initMsg");
+
+  if (!filterSport && !filterWorker) {
+    resultsBar.style.display = "none";
+    panel.innerHTML = `<div class="state-msg">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+        <circle cx="18" cy="18" r="14" stroke="#BCBEC0" stroke-width="2.5"/>
+        <path d="M18 9v9l5 3" stroke="#BCBEC0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p>Select a sport or worker name above to view the arrival schedule.</p>
+    </div>`;
+    return;
+  }
+
+  // Determine which sports to show
+  const sportIdxs = filterSport !== ""
+    ? [parseInt(filterSport)]
+    : SPORTS.map((_,i)=>i);
+
+  // Check if any of the needed sports are still loading
+  const anyLoading = sportIdxs.some(i => !cache[SPORTS[i].gid] && loadingGids.has(SPORTS[i].gid));
+  const anyMissing = sportIdxs.some(i => !cache[SPORTS[i].gid] && !loadingGids.has(SPORTS[i].gid));
+
+  // Kick off loads for anything not yet fetched
+  sportIdxs.forEach(i => { if (!cache[SPORTS[i].gid] && !loadingGids.has(SPORTS[i].gid)) loadSport(i).then(render); });
+
+  // Collect all matching games
+  const allGames = [];
+  sportIdxs.forEach(i => {
+    const data = cache[SPORTS[i].gid];
+    if (!data) return;
+    data.games.forEach(g => {
+      if (isPast(g.date)) return;
+      if (filterWorker) {
+        const hasWorker = Object.values(g.workers).some(w => w===filterWorker);
+        if (!hasWorker) return;
+      }
+      allGames.push({ game: g, data });
+    });
+  });
+
+  // Update results bar
+  resultsBar.style.display = "flex";
+  let titleParts = [];
+  if (filterSport !== "") titleParts.push(SPORTS[parseInt(filterSport)].label);
+  if (filterWorker) titleParts.push(filterWorker);
+  document.getElementById("resultsTitle").textContent =
+    titleParts.length ? titleParts.join(" — ") : "All upcoming games";
+
+  if (anyLoading && !allGames.length) {
+    panel.innerHTML = `<div class="state-msg"><div class="spinner"></div><p>Loading schedule…</p></div>`;
+    return;
+  }
+
+  if (!allGames.length) {
+    const stillLoading = sportIdxs.some(i => loadingGids.has(SPORTS[i].gid));
+    panel.innerHTML = stillLoading
+      ? `<div class="state-msg"><div class="spinner"></div><p>Loading…</p></div>`
+      : `<div class="empty-msg">No upcoming games found${filterWorker?" for "+esc(filterWorker):""}.</div>`;
+    return;
+  }
+
+  panel.innerHTML = viewMode === "card"
+    ? renderCards(allGames, filterWorker)
+    : renderTable(allGames, filterWorker);
+
+  // Refresh timestamp
+  const ts = new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+  panel.innerHTML += `<div class="refresh-row">Synced at ${ts} <button class="refresh-btn" onclick="hardRefresh()">Refresh now</button></div>`;
+}
+
+/* ── CARD VIEW ── */
+function renderCards(allGames, fw) {
+  // Group by sport if no sport filter
+  const grouped = {};
+  allGames.forEach(({game:g, data}) => {
+    const key = g.sport;
+    if (!grouped[key]) grouped[key] = {data, games:[]};
+    grouped[key].games.push(g);
+  });
+
+  let html = "";
+  Object.entries(grouped).forEach(([sport, {data, games}]) => {
+    if (Object.keys(grouped).length > 1) {
+      html += `<div class="game-section-label"><span class="sport-tag ${tagClass(sport)}">${esc(sport)}</span></div>`;
+    }
+    games.forEach(g => {
+      const gt      = parseTime(g.time);
+      const isMine  = fw && Object.values(g.workers).some(w=>w===fw);
+      const posList = fw
+        ? data.positions.filter(p => g.workers[p]===fw)
+        : data.positions;
+
+      html += `<div class="game-card${isMine?" has-mine":""}">
+        <div class="gc-head${isMine?" has-mine":""}">
+          <span class="gc-opp">vs. ${esc(g.opp)}</span>
+          <span class="gc-meta">${esc(fmtDate(g.date))}${gt?" &nbsp;·&nbsp; Game time: "+fmtTime(gt.h,gt.min):g.time?" &nbsp;·&nbsp; "+esc(g.time):""}</span>
+        </div>
+        <div class="gc-body">
+          ${posList.map(pos => {
+            const worker = g.workers[pos]||"";
+            const mins   = data.arrivalMins[pos];
+            const mine   = fw && worker===fw;
+            let timeHtml = "";
+            if (gt && mins!=null) {
+              const at = arrivalTime(gt.h,gt.min,mins);
+              timeHtml = `<div class="ac-time">${fmtTime(at.h,at.min)}</div>
+                          <div class="ac-badge"><span class="badge ${badgeClass(mins)}">${mins} min early</span></div>`;
+            } else {
+              timeHtml = `<div class="ac-time tbd">Time TBD</div>`;
+            }
+            return `<div class="assign-card${mine?" mine":""}">
+              <div class="ac-pos">${esc(pos)}</div>
+              <div class="ac-name${worker?"":" unassigned"}">${worker?esc(worker):"Unassigned"}</div>
+              ${timeHtml}
+            </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+    });
+  });
+  return html || `<div class="empty-msg">No games found.</div>`;
+}
+
+/* ── TABLE VIEW ── */
+function renderTable(allGames, fw) {
+  const grouped = {};
+  allGames.forEach(({game:g,data}) => {
+    const key = g.sport;
+    if (!grouped[key]) grouped[key]={data,games:[]};
+    grouped[key].games.push(g);
+  });
+
+  let html = "";
+  Object.entries(grouped).forEach(([sport,{data,games}]) => {
+    if (Object.keys(grouped).length > 1) {
+      html += `<div class="game-section-label"><span class="sport-tag ${tagClass(sport)}">${esc(sport)}</span></div>`;
+    }
+    let rows = "";
+    games.forEach(g => {
+      const gt      = parseTime(g.time);
+      const posList = fw
+        ? data.positions.filter(p=>g.workers[p]===fw)
+        : data.positions;
+      if (!posList.length) return;
+
+      posList.forEach((pos, i) => {
+        const worker = g.workers[pos]||"";
+        const mins   = data.arrivalMins[pos];
+        const mine   = fw && worker===fw;
+        let timeStr="TBD", timeClass="td-arrive tbd";
+        if (gt && mins!=null) {
+          const at = arrivalTime(gt.h,gt.min,mins);
+          timeStr = fmtTime(at.h,at.min);
+          timeClass = "td-arrive"+(mine?" mine-time":"");
+        }
+        const showGame = !fw ? i===0 : true;
+        rows += `<tr class="${mine?"mine-row":""}">
+          <td>${showGame?`<div class="td-opp">${esc(g.opp)}</div><div class="td-sub">${esc(fmtDate(g.date))}${g.time&&g.time!=="TBD"?" · "+esc(g.time):""}</div>`:""}</td>
+          <td class="td-pos">${esc(pos)}</td>
+          <td class="td-worker${worker?"":" unassigned"}">${worker?esc(worker):"Unassigned"}</td>
+          <td class="${timeClass}">${timeStr}</td>
+          <td>${mins!=null?`<span class="badge ${badgeClass(mins)}">${mins} min early</span>`:""}</td>
+        </tr>`;
+      });
+    });
+
+    if (rows) {
+      html += `<div class="tbl-wrap">
+        <table class="sched-tbl">
+          <thead><tr><th>Game</th><th>Position</th><th>Worker</th><th>Arrive By</th><th>Lead Time</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    }
+  });
+  return html || `<div class="empty-msg">No games found.</div>`;
+}
+
+/* ════════════════════════════════════════════
+   HARD REFRESH
+   ════════════════════════════════════════════ */
+function hardRefresh() {
+  cache = {};
+  allWorkers = new Set();
+  const panel = document.getElementById("mainPanel");
+  panel.innerHTML = `<div class="state-msg"><div class="spinner"></div><p>Refreshing from Google Sheets…</p></div>`;
+  loadAllSports().then(render);
+}
+
+/* ════════════════════════════════════════════
+   AUTO-REFRESH every 5 minutes
+   ════════════════════════════════════════════ */
+setInterval(() => {
+  cache = {};
+  allWorkers = new Set();
+  loadAllSports().then(() => {
+    if (filterSport || filterWorker) render();
+  });
+}, 5 * 60 * 1000);
+
+/* ════════════════════════════════════════════
+   INIT
+   ════════════════════════════════════════════ */
+populateSportDropdown();
+loadAllSports(); // pre-load all sheets in background to build worker list
+</script>
+</body>
+</html>
