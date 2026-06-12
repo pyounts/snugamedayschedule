@@ -6,53 +6,980 @@
 <title>SNU Athletics — Game Day Scheduler</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght=500;600;700&family=Source+Sans+3:ital,wght=0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
+/* ═══════════════════════════════════════
+   SNU Athletics Scheduler — Styles
+   ═══════════════════════════════════════ */
 :root {
-  --crimson:#A90533; --crimson-dk:#7d0325; --crimson-bg:#fdf0f2;
-  --gray:#BCBEC0; --gray-dk:#7a7c7e; --gray-md:#dddfe1; --gray-lt:#f4f4f5;
-  --ink:#1a1a1a; --ink-soft:#505254; --white:#ffffff;
-  --green:#1e6b3c; --green-bg:#d9f0e4;
-  --blue:#1a4e8a;  --blue-bg:#d6e8f8;
-  --amber:#8a4a00; --amber-bg:#fde8cc;
-  --fd:'Oswald',sans-serif; --fb:'Source Sans 3',sans-serif;
-  --r:6px; --rlg:10px; --shadow:0 2px 14px rgba(0,0,0,.09);
+  --crimson:    #A90533;
+  --crimson-dk: #7d0325;
+  --crimson-bg: #fdf0f2;
+  --gray:       #BCBEC0;
+  --gray-dk:    #7a7c7e;
+  --gray-md:    #dddfe1;
+  --gray-lt:    #f4f4f5;
+  --ink:        #1a1a1a;
+  --ink-soft:   #505254;
+  --white:      #ffffff;
+  --green:      #1e6b3c;  --green-bg:  #d9f0e4;
+  --blue:       #1a4e8a;  --blue-bg:   #d6e8f8;
+  --amber:      #8a4a00;  --amber-bg:  #fde8cc;
+  --fd: 'Oswald', sans-serif;
+  --fb: 'Source Sans 3', sans-serif;
+  --r:   6px;
+  --rlg: 10px;
+  --shadow: 0 2px 14px rgba(0,0,0,.09);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--fb);background:var(--gray-lt);color:var(--ink);font-size:15px;min-height:100vh}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--fb);
+  background: var(--gray-lt);
+  color: var(--ink);
+  font-size: 15px;
+  min-height: 100vh;
+}
 
 /* ── HEADER ── */
-.hdr{background:var(--crimson);padding:0 2rem;display:flex;align-items:center;gap:14px;border-bottom:4px solid var(--crimson-dk);box-shadow:0 2px 10px rgba(169,5,51,.3);position:sticky;top:0;z-index:200}
-.hdr-icon{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin:10px 0}
-.hdr-text{flex:1}
-.hdr-text h1{font-family:var(--fd);font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--white);line-height:1.1}
-.hdr-text p{font-size:11px;color:rgba(255,255,255,.65);letter-spacing:.8px;text-transform:uppercase;margin-top:1px}
+.hdr {
+  background: var(--crimson);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 4px solid var(--crimson-dk);
+  box-shadow: 0 2px 10px rgba(169,5,51,.3);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.hdr-icon {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin: 10px 0;
+}
+.hdr-text { flex: 1; }
+.hdr-text h1 {
+  font-family: var(--fd); font-size: 20px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--white); line-height: 1.1;
+}
+.hdr-text p {
+  font-size: 11px; color: rgba(255,255,255,.65);
+  letter-spacing: .8px; text-transform: uppercase; margin-top: 1px;
+}
 
 /* ── LAYOUT ── */
-.wrap{max-width:1060px;margin:0 auto;padding:1.75rem 1.5rem}
+.wrap { max-width: 1060px; margin: 0 auto; padding: 1.75rem 1.5rem; }
 
 /* ── FILTER CARD ── */
-.filter-card{background:var(--white);border-radius:var(--rlg);box-shadow:var(--shadow);padding:1.25rem 1.5rem;margin-bottom:1rem}
-.filter-card-title{font-family:var(--fd);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray-dk);margin-bottom:.875rem}
-.filter-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
-.filter-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:180px}
-.filter-label{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--gray-dk)}
-.filter-field select{font-family:var(--fb);font-size:14px;color:var(--ink);background:var(--white);border:1.5px solid var(--gray-md);border-radius:var(--r);padding:9px 10px;width:100%;outline:none;transition:border-color .15s;cursor:pointer}
-.filter-field select:focus{border-color:var(--crimson)}
-.btn-clear{font-family:var(--fd);font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:9px 16px;border-radius:var(--r);border:2px solid var(--gray-md);background:transparent;color:var(--ink-soft);cursor:pointer;transition:all .15s;white-space:nowrap}
-.btn-clear:hover{border-color:var(--crimson);color:var(--crimson)}
+.filter-card {
+  background: var(--white); border-radius: var(--rlg);
+  box-shadow: var(--shadow); padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+}
+.filter-card-title {
+  font-family: var(--fd); font-size: 12px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--gray-dk); margin-bottom: .875rem;
+}
+.filter-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+.filter-field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 180px; }
+.filter-label {
+  font-size: 11px; font-weight: 600; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--gray-dk);
+}
+.filter-field select {
+  font-family: var(--fb); font-size: 14px; color: var(--ink);
+  background: var(--white); border: 1.5px solid var(--gray-md);
+  border-radius: var(--r); padding: 9px 10px; width: 100%;
+  outline: none; transition: border-color .15s; cursor: pointer;
+}
+.filter-field select:focus { border-color: var(--crimson); }
+.btn-clear {
+  font-family: var(--fd); font-size: 12px; font-weight: 600;
+  letter-spacing: .5px; text-transform: uppercase;
+  padding: 9px 16px; border-radius: var(--r);
+  border: 2px solid var(--gray-md); background: transparent;
+  color: var(--ink-soft); cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.btn-clear:hover { border-color: var(--crimson); color: var(--crimson); }
 
-/* ── RESULTS HEADER ── */
-.results-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:1rem}
-.results-title{font-family:var(--fd);font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft)}
-.vtoggle{display:flex;border:1.5px solid var(--gray-md);border-radius:var(--r);overflow:hidden}
-.vtoggle button{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;padding:6px 13px;background:var(--white);border:none;color:var(--gray-dk);cursor:pointer;transition:all .15s}
-.vtoggle button.on{background:var(--crimson);color:var(--white)}
-.vtoggle button:not(.on):hover{background:var(--crimson-bg);color:var(--crimson)}
+/* ── RESULTS BAR ── */
+.results-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px; margin-bottom: 1rem;
+}
+.results-title {
+  font-family: var(--fd); font-size: 16px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px; color: var(--ink-soft);
+}
+.vtoggle { display: flex; border: 1.5px solid var(--gray-md); border-radius: var(--r); overflow: hidden; }
+.vtoggle button {
+  font-family: var(--fd); font-size: 11px; font-weight: 600;
+  letter-spacing: .3px; text-transform: uppercase;
+  padding: 6px 13px; background: var(--white); border: none;
+  color: var(--gray-dk); cursor: pointer; transition: all .15s;
+}
+.vtoggle button.on { background: var(--crimson); color: var(--white); }
+.vtoggle button:not(.on):hover { background: var(--crimson-bg); color: var(--crimson); }
 
-/* ── MAIN PANEL ── */
-.panel{background:var(--white);border-radius:var(--rlg);box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1rem}
+/* ── PANEL ── */
+.panel {
+  background: var(--white); border-radius: var(--rlg);
+  box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: .5rem;
+}
 
 /* ── STATE MESSAGES ── */
-.state-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;gap:.75rem;color:var(--gray-dk)}
-.spinner{width:32px;height:32
+.state-msg {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 3rem 1rem;
+  gap: .875rem; color: var(--gray-dk); text-align: center;
+}
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--gray-md); border-top-color: var(--crimson);
+  border-radius: 50%; animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.state-msg p { font-size: 14px; max-width: 400px; line-height: 1.55; }
+.retry-btn {
+  padding: 8px 18px; background: var(--crimson); color: #fff;
+  border: none; border-radius: var(--r);
+  font-family: var(--fd); font-size: 13px; font-weight: 600;
+  text-transform: uppercase; cursor: pointer; letter-spacing: .4px;
+}
+.retry-btn:hover { background: var(--crimson-dk); }
+
+/* ── SYNC ROW ── */
+.sync-row {
+  text-align: right; font-size: 11px; color: var(--gray-dk);
+  padding: .25rem .25rem .5rem; display: flex;
+  justify-content: flex-end; align-items: center; gap: 6px;
+}
+.refresh-btn {
+  background: none; border: none; color: var(--crimson);
+  font-size: 12px; cursor: pointer; font-family: var(--fb);
+  text-decoration: underline; padding: 0;
+}
+
+/* ── SECTION LABEL ── */
+.sec-label {
+  font-family: var(--fd); font-size: 12px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--gray-dk);
+  padding-bottom: 6px; border-bottom: 1.5px solid var(--gray-md);
+  margin: 1.25rem 0 .875rem;
+}
+.sec-label:first-child { margin-top: 0; }
+
+/* ── CARD VIEW ── */
+.game-card {
+  border: 2px solid var(--gray-md); border-radius: var(--rlg);
+  margin-bottom: .875rem; overflow: hidden;
+}
+.game-card.has-mine { border-color: var(--crimson); }
+.gc-head {
+  background: var(--gray-lt); padding: .875rem 1.25rem;
+  display: flex; align-items: baseline; gap: .75rem;
+  flex-wrap: wrap; border-bottom: 1.5px solid var(--gray-md);
+}
+.gc-head.has-mine { background: var(--crimson-bg); border-bottom-color: rgba(169,5,51,.2); }
+.gc-opp {
+  font-family: var(--fd); font-size: 18px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .4px; color: var(--ink); flex: 1;
+}
+.gc-meta { font-size: 12px; color: var(--gray-dk); }
+.gc-body { display: flex; flex-wrap: wrap; gap: 10px; padding: 1rem 1.25rem; }
+.ac {
+  flex: 1; min-width: 150px; max-width: 220px;
+  border: 1.5px solid var(--gray-md); border-radius: var(--r);
+  padding: 9px 12px; background: var(--white);
+}
+.ac.mine { border-color: var(--crimson); background: var(--crimson-bg); }
+.ac-pos  { font-size: 12px; font-weight: 600; color: var(--ink); }
+.ac-name { font-size: 12px; color: var(--gray-dk); margin-top: 2px; font-style: italic; }
+.ac-name.un { color: var(--gray); }
+.ac-time {
+  font-family: var(--fd); font-size: 22px; font-weight: 700;
+  color: var(--crimson); margin-top: 5px; line-height: 1;
+}
+.ac-time.tbd { font-size: 13px; font-weight: 500; color: var(--gray-dk); font-family: var(--fb); }
+.ac-badge { margin-top: 5px; }
+
+/* ── TABLE VIEW ── */
+.tbl-wrap {
+  border: 1.5px solid var(--gray-md); border-radius: var(--rlg);
+  overflow: hidden; margin-bottom: .875rem;
+}
+.sched-tbl { width: 100%; border-collapse: collapse; }
+.sched-tbl thead th {
+  font-family: var(--fd); font-size: 11px; font-weight: 700;
+  letter-spacing: .8px; text-transform: uppercase; color: var(--gray-dk);
+  background: var(--gray-lt); padding: 9px 14px;
+  text-align: left; border-bottom: 1.5px solid var(--gray-md);
+}
+.sched-tbl tbody tr { border-bottom: 1px solid var(--gray-md); transition: background .1s; }
+.sched-tbl tbody tr:last-child { border-bottom: none; }
+.sched-tbl tbody tr:hover { background: var(--crimson-bg); }
+.sched-tbl tbody tr.mine-row { background: var(--crimson-bg); }
+.sched-tbl tbody tr.mine-row td:first-child { border-left: 3px solid var(--crimson); }
+.sched-tbl td { padding: 10px 14px; font-size: 13px; vertical-align: middle; }
+.td-opp  { font-weight: 600; font-size: 14px; }
+.td-sub  { font-size: 11px; color: var(--gray-dk); margin-top: 2px; }
+.td-pos  { font-weight: 600; }
+.td-wk   { color: var(--ink-soft); }
+.td-wk.un { color: var(--gray); font-style: italic; }
+.td-arr  { font-family: var(--fd); font-size: 17px; font-weight: 700; color: var(--ink); }
+.td-arr.mine-t { color: var(--crimson); }
+.td-arr.tbd { font-size: 13px; font-weight: 400; color: var(--gray-dk); font-family: var(--fb); }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-block; font-family: var(--fd); font-size: 10px;
+  font-weight: 700; letter-spacing: .3px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px;
+}
+.b-red   { background: #fad8d8;        color: var(--crimson); }
+.b-amber { background: var(--amber-bg); color: var(--amber);  }
+.b-blue  { background: var(--blue-bg);  color: var(--blue);   }
+.b-green { background: var(--green-bg); color: var(--green);  }
+
+/* ── SPORT CHIPS ── */
+.sc { display: inline-block; font-family: var(--fd); font-size: 10px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
+.sc-s  { background: #d9f0e4; color: #1e6b3c; }
+.sc-v  { background: #d6e8f8; color: #1a4e8a; }
+.sc-f  { background: #fde8cc; color: #8a4a00; }
+.sc-b  { background: #ede8fa; color: #4a1a8a; }
+.sc-r  { background: #fdf0f2; color: var(--crimson); }
+.sc-bs { background: #d9f0e4; color: #1e6b3c; }
+.sc-sb { background: #fde8cc; color: #8a4a00; }
+
+/* ── ERROR BOX ── */
+.error-box {
+  background: #fff5f5; border: 2px solid #fcc; border-radius: var(--rlg);
+  padding: 1.25rem 1.5rem; font-size: 13px; line-height: 1.6;
+}
+.error-box h3 {
+  font-family: var(--fd); font-size: 14px; font-weight: 700;
+  text-transform: uppercase; color: var(--crimson); margin-bottom: .5rem;
+}
+.error-box code {
+  background: #ffeaea; padding: 1px 5px; border-radius: 3px;
+  font-size: 12px; font-family: monospace;
+}
+.error-box .btn-row { margin-top: .875rem; display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── DEBUG ── */
+.debug-box {
+  background: #1a1a1a; color: #a8ff78; border-radius: var(--r);
+  padding: 1rem; font-family: monospace; font-size: 11px;
+  white-space: pre-wrap; word-break: break-all;
+  max-height: 320px; overflow-y: auto; margin-top: 1rem;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .wrap { padding: 1rem; }
+  .hdr  { padding: 0 1rem; }
+  .panel { padding: 1rem; }
+  .filter-card { padding: 1rem; }
+  .ac { min-width: 140px; }
+  .sched-tbl thead th:nth-child(5),
+  .sched-tbl td:nth-child(5) { display: none; }
+}
+
+/* ── PRINT ── */
+@media print {
+  .hdr, .filter-card, .results-bar, .sync-row { display: none !important; }
+  .panel { box-shadow: none; border-radius: 0; padding: 0; }
+  .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-icon" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <circle cx="11" cy="11" r="8.5" stroke="white" stroke-width="2"/>
+      <path d="M11 5v6l4 2.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="hdr-text">
+    <h1>SNU Athletics</h1>
+    <p>Game Day Staff Scheduler — 26–27</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- FILTER CARD -->
+  <div class="filter-card">
+    <div class="filter-card-title">Find Your Schedule</div>
+    <div class="filter-row">
+      <div class="filter-field">
+        <label class="filter-label" for="sportSel">Sport</label>
+        <select id="sportSel" onchange="onFilterChange()">
+          <option value="">— All sports —</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="workerSel">My Name</label>
+        <select id="workerSel" onchange="onFilterChange()">
+          <option value="">— All workers —</option>
+        </select>
+      </div>
+      <button class="btn-clear" onclick="clearFilters()">Clear</button>
+    </div>
+  </div>
+
+  <!-- RESULTS BAR -->
+  <div class="results-bar" id="resultsBar" style="display:none">
+    <span class="results-title" id="resultsTitle"></span>
+    <div class="vtoggle">
+      <button id="vtCard" class="on" onclick="setView('card')">&#9647; Cards</button>
+      <button id="vtTable" onclick="setView('table')">&#9776; Table</button>
+    </div>
+  </div>
+
+  <!-- MAIN PANEL -->
+  <div class="panel" id="mainPanel">
+    <div class="state-msg">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="14" stroke="#BCBEC0" stroke-width="2.5"/>
+        <path d="M18 9v9l5 3" stroke="#BCBEC0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p>Select a sport or your name above to view your arrival schedule.</p>
+    </div>
+  </div>
+
+  <div class="sync-row" id="syncRow" style="display:none">
+    <span id="syncTime"></span>
+    <button class="refresh-btn" onclick="hardRefresh()">&#8635; Refresh</button>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   SNU Athletics Game Day Scheduler
+   Reads live from Google Sheets published CSV endpoints
+   ═══════════════════════════════════════════════════════ */
+
+// ── Sport definitions ─────────────────────────────────
+// Each entry maps a sport label to its Google Sheet tab (gid).
+// To add a sport: add a new entry here.
+const SPORTS = [
+  { label: "Women's Soccer",     gid: "0"          },
+  { label: "Men's Soccer",       gid: "1015410633" },
+  { label: "Volleyball",         gid: "971938409"  },
+  { label: "Football",           gid: "1214538622" },
+  { label: "Men's Basketball",   gid: "1109526714" },
+  { label: "Women's Basketball", gid: "528085348"  },
+  { label: "Baseball",           gid: "36202340"   },
+  { label: "Softball",           gid: "1232068872" },
+  { label: "Men's Rugby",        gid: "1275727010" },
+  { label: "Women's Rugby",      gid: "1280706141" },
+];
+
+// ── Base URL for all published CSV sheets ─────────────
+const BASE = "https://docs.google.com/spreadsheets/d/e/" +
+  "2PACX-1vRe5hngccHSK9hhYFRylTBAGeyfzMLQsGoCzop7zxVC9D7wKtwxKYS9WvK5nKt1_MfUddh5NrL3-O0t" +
+  "/pub";
+
+function csvUrl(gid) {
+  return `${BASE}?gid=${gid}&single=true&output=csv`;
+}
+
+// ── App state ─────────────────────────────────────────
+let cache       = {};        // gid → parsed data
+let loading     = new Set(); // gids currently fetching
+let allWorkers  = new Set(); // all worker names seen
+let filterSport = "";        // "" = all sports, else index string
+let filterWorker= "";        // "" = all workers
+let viewMode    = "card";    // "card" | "table"
+let dbgLog      = [];        // debug messages
+
+// ── Debug logger ──────────────────────────────────────
+function log(...a) {
+  const msg = a.map(x => typeof x === "object" ? JSON.stringify(x) : String(x)).join(" ");
+  dbgLog.push(msg);
+  console.log("[SNU]", msg);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CSV PARSER
+   Handles quoted fields, embedded commas, CRLF/LF
+   ═══════════════════════════════════════════════════════ */
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = "", inQ = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (ch === '"') inQ = false;
+      else field += ch;
+    } else {
+      if      (ch === '"')                { inQ = true; }
+      else if (ch === ',')                { row.push(field.trim()); field = ""; }
+      else if (ch === '\n' || ch === '\r') {
+        row.push(field.trim());
+        if (row.some(f => f !== "")) rows.push(row);
+        row = []; field = "";
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+      } else field += ch;
+    }
+  }
+  // last row
+  row.push(field.trim());
+  if (row.some(f => f !== "")) rows.push(row);
+  return rows;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SHEET PARSER
+   Sheet layout expected:
+     Row 0    : Date | Time | Opponent | [Pos1] | [Pos2] | ...
+     Rows 1–N : one game per row
+     Divider  : a row where ANY cell contains "arrival"
+                  → that row's cols 3+ = minutes before game
+                  → OR the row immediately after contains the minutes
+   ═══════════════════════════════════════════════════════ */
+function parseSheet(csvText, sportLabel) {
+  const rows = parseCSV(csvText);
+  log(`[${sportLabel}] total CSV rows: ${rows.length}`);
+  if (rows.length < 2) return null;
+
+  // Row 0 = column headers
+  const headers   = rows[0].map(h => h.trim());
+  const positions = headers.slice(3).filter(Boolean);
+  log(`[${sportLabel}] positions: ${positions.join(", ")}`);
+  if (!positions.length) return null;
+
+  // ── Find "Arrival Time" divider row ──
+  let divIdx = -1;
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i].some(c => c.toLowerCase().includes("arrival"))) {
+      divIdx = i;
+      log(`[${sportLabel}] arrival row at index ${divIdx}: ${rows[i].join(" | ")}`);
+      break;
+    }
+  }
+
+  // ── Parse arrival minutes ──
+  // Try: same row as "Arrival Time" (columns 3+)
+  // Then: the row immediately after (in case the label and numbers are on separate rows)
+  const arrivalMins = {};
+  if (divIdx !== -1) {
+    const candidates = [rows[divIdx], rows[divIdx + 1]].filter(Boolean);
+    for (const aRow of candidates) {
+      let found = false;
+      positions.forEach((pos, pi) => {
+        if (arrivalMins[pos] != null) return;
+        const v = parseFloat((aRow[3 + pi] || "").trim());
+        if (!isNaN(v)) { arrivalMins[pos] = v; found = true; }
+      });
+      if (found) break;
+    }
+    log(`[${sportLabel}] arrivalMins: ${JSON.stringify(arrivalMins)}`);
+  } else {
+    log(`[${sportLabel}] WARNING — no arrival row found`);
+  }
+
+  // ── Parse games ──
+  const endIdx = divIdx !== -1 ? divIdx : rows.length;
+  const games  = [];
+  for (let i = 1; i < endIdx; i++) {
+    const row  = rows[i];
+    const date = (row[0] || "").trim();
+    const time = (row[1] || "").trim();
+    const opp  = (row[2] || "").trim();
+    if (!date || !opp) continue;
+    // Skip separator / repeat-header rows
+    if (/^-+$/.test(opp) || /^opponent$/i.test(opp) || /^date$/i.test(date)) continue;
+
+    const workers = {};
+    positions.forEach((pos, pi) => {
+      const name = (row[3 + pi] || "").trim();
+      if (name) { workers[pos] = name; allWorkers.add(name); }
+    });
+    games.push({ date, time, opp, workers });
+  }
+  log(`[${sportLabel}] games parsed: ${games.length}`);
+  return { positions, arrivalMins, games, sport: sportLabel };
+}
+
+/* ═══════════════════════════════════════════════════════
+   FETCH — direct Google Sheets CSV (works on GitHub Pages)
+   Falls back to a CORS proxy if direct fails
+   ═══════════════════════════════════════════════════════ */
+async function fetchCSV(gid) {
+  const url = csvUrl(gid);
+
+  // Attempt 1 — direct fetch (works fine from GitHub Pages)
+  try {
+    log(`Fetching gid=${gid} directly`);
+    const r = await fetch(url, { redirect: "follow" });
+    log(`Direct → status ${r.status}`);
+    if (r.ok) {
+      const text = await r.text();
+      if (text.length > 20 && !text.trim().startsWith("<")) {
+        log(`Direct fetch OK, length=${text.length}`);
+        return text;
+      }
+      log("Direct fetch returned HTML, not CSV");
+    }
+  } catch (e) {
+    log(`Direct fetch error: ${e.message}`);
+  }
+
+  // Attempt 2 — corsproxy.io (free, reliable fallback)
+  const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+  try {
+    log(`Trying corsproxy for gid=${gid}`);
+    const r = await fetch(proxy);
+    log(`Proxy → status ${r.status}`);
+    if (r.ok) {
+      const text = await r.text();
+      if (text.length > 20 && !text.trim().startsWith("<")) {
+        log(`Proxy fetch OK, length=${text.length}`);
+        return text;
+      }
+    }
+  } catch (e) {
+    log(`Proxy fetch error: ${e.message}`);
+  }
+
+  log(`All fetch attempts failed for gid=${gid}`);
+  return null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOAD A SPORT
+   ═══════════════════════════════════════════════════════ */
+async function loadSport(idx) {
+  const sport = SPORTS[idx];
+  if (cache[sport.gid]) return cache[sport.gid];
+  if (loading.has(sport.gid)) return null;
+
+  loading.add(sport.gid);
+  try {
+    const text = await fetchCSV(sport.gid);
+    if (!text) return null;
+    const data = parseSheet(text, sport.label);
+    if (data) {
+      cache[sport.gid] = data;
+      populateWorkerDropdown();
+    }
+    return data;
+  } catch (e) {
+    log(`loadSport error [${sport.label}]: ${e.message}`);
+    return null;
+  } finally {
+    loading.delete(sport.gid);
+  }
+}
+
+async function loadAll() {
+  await Promise.allSettled(SPORTS.map((_, i) => loadSport(i)));
+  populateWorkerDropdown();
+  if (filterSport !== "" || filterWorker) render();
+}
+
+/* ═══════════════════════════════════════════════════════
+   UTILITY FUNCTIONS
+   ═══════════════════════════════════════════════════════ */
+function esc(s) {
+  return String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Parse "7:00 PM", "19:00", "7 PM" → {h, m} or null
+function parseTime(raw) {
+  if (!raw || /^\s*$/.test(raw) || /tbd/i.test(raw)) return null;
+  const s = raw.trim();
+  let m;
+  m = s.match(/^(\d{1,2}):(\d{2})\s*(am|pm)$/i);
+  if (m) {
+    let h = +m[1], mn = +m[2], ap = m[3].toUpperCase();
+    if (ap === "PM" && h !== 12) h += 12;
+    if (ap === "AM" && h === 12) h = 0;
+    return { h, m: mn };
+  }
+  m = s.match(/^(\d{1,2}):(\d{2})$/);
+  if (m) return { h: +m[1], m: +m[2] };
+  m = s.match(/^(\d{1,2})\s*(am|pm)$/i);
+  if (m) {
+    let h = +m[1], ap = m[2].toUpperCase();
+    if (ap === "PM" && h !== 12) h += 12;
+    if (ap === "AM" && h === 12) h = 0;
+    return { h, m: 0 };
+  }
+  return null;
+}
+
+function fmtTime(h, m) {
+  const ap = h >= 12 ? "PM" : "AM";
+  const hr = h % 12 === 0 ? 12 : h % 12;
+  return `${hr}:${String(m).padStart(2, "0")} ${ap}`;
+}
+
+function arriveAt(gh, gm, mins) {
+  const norm = ((gh * 60 + gm - mins) % 1440 + 1440) % 1440;
+  return { h: Math.floor(norm / 60), m: norm % 60 };
+}
+
+function badgeClass(m) {
+  return m >= 90 ? "b-red" : m >= 60 ? "b-amber" : m >= 40 ? "b-blue" : "b-green";
+}
+
+function sportChipClass(s) {
+  if (s.includes("Soccer"))     return "sc sc-s";
+  if (s.includes("Volleyball")) return "sc sc-v";
+  if (s.includes("Football"))   return "sc sc-f";
+  if (s.includes("Basketball")) return "sc sc-b";
+  if (s.includes("Rugby"))      return "sc sc-r";
+  if (s === "Baseball")         return "sc sc-bs";
+  if (s === "Softball")         return "sc sc-sb";
+  return "sc";
+}
+
+function fmtDate(raw) {
+  if (!raw) return "";
+  let m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (m) {
+    let yr = +m[3];
+    if (yr < 100) yr += 2000;
+    return new Date(yr, +m[1] - 1, +m[2])
+      .toLocaleDateString("en-US", { weekday:"short", month:"short", day:"numeric", year:"numeric" });
+  }
+  m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return new Date(+m[1], +m[2]-1, +m[3])
+    .toLocaleDateString("en-US", { weekday:"short", month:"short", day:"numeric", year:"numeric" });
+  return raw;
+}
+
+function isPast(dateRaw) {
+  if (!dateRaw) return false;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  let m = dateRaw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (m) {
+    let yr = +m[3]; if (yr < 100) yr += 2000;
+    return new Date(yr, +m[1] - 1, +m[2]) < today;
+  }
+  m = dateRaw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return new Date(+m[1], +m[2]-1, +m[3]) < today;
+  return false;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DROPDOWNS
+   ═══════════════════════════════════════════════════════ */
+function populateSportDropdown() {
+  const sel = document.getElementById("sportSel");
+  sel.innerHTML = '<option value="">— All sports —</option>' +
+    SPORTS.map((s, i) => `<option value="${i}">${esc(s.label)}</option>`).join("");
+}
+
+function populateWorkerDropdown() {
+  const sel = document.getElementById("workerSel");
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— All workers —</option>' +
+    [...allWorkers].sort().map(n =>
+      `<option value="${esc(n)}"${n === cur ? " selected" : ""}>${esc(n)}</option>`
+    ).join("");
+}
+
+/* ═══════════════════════════════════════════════════════
+   FILTER CONTROLS
+   ═══════════════════════════════════════════════════════ */
+function onFilterChange() {
+  filterSport  = document.getElementById("sportSel").value;
+  filterWorker = document.getElementById("workerSel").value;
+  render();
+}
+
+function clearFilters() {
+  document.getElementById("sportSel").value  = "";
+  document.getElementById("workerSel").value = "";
+  filterSport = ""; filterWorker = "";
+  render();
+}
+
+function setView(v) {
+  viewMode = v;
+  document.getElementById("vtCard").className  = v === "card"  ? "on" : "";
+  document.getElementById("vtTable").className = v === "table" ? "on" : "";
+  render();
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════════════════ */
+function showPanel(html) {
+  document.getElementById("mainPanel").innerHTML = html;
+}
+
+function render() {
+  const resultsBar = document.getElementById("resultsBar");
+  const syncRow    = document.getElementById("syncRow");
+
+  // No filter selected — show placeholder
+  if (filterSport === "" && !filterWorker) {
+    resultsBar.style.display = "none";
+    syncRow.style.display    = "none";
+    showPanel(`<div class="state-msg">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="14" stroke="#BCBEC0" stroke-width="2.5"/>
+        <path d="M18 9v9l5 3" stroke="#BCBEC0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p>Select a sport or your name above to view your arrival schedule.</p>
+    </div>`);
+    return;
+  }
+
+  // Which sport indices to include
+  const idxs = filterSport !== ""
+    ? [parseInt(filterSport)]
+    : SPORTS.map((_, i) => i);
+
+  // Kick off any not-yet-started loads
+  idxs.forEach(i => {
+    if (!cache[SPORTS[i].gid] && !loading.has(SPORTS[i].gid)) {
+      loadSport(i).then(() => render());
+    }
+  });
+
+  // Collect matching upcoming games from loaded data
+  const rows = [];
+  idxs.forEach(i => {
+    const data = cache[SPORTS[i].gid];
+    if (!data) return;
+    data.games.forEach(g => {
+      if (isPast(g.date)) return;
+      if (filterWorker && !Object.values(g.workers).includes(filterWorker)) return;
+      rows.push({ game: g, data });
+    });
+  });
+
+  // Results bar label
+  resultsBar.style.display = "flex";
+  const parts = [];
+  if (filterSport !== "") parts.push(SPORTS[parseInt(filterSport)].label);
+  if (filterWorker)       parts.push(filterWorker);
+  document.getElementById("resultsTitle").textContent =
+    parts.length ? parts.join(" — ") : "All upcoming games";
+
+  const stillLoading = idxs.some(i => loading.has(SPORTS[i].gid));
+  const allFailed    = idxs.every(i => !cache[SPORTS[i].gid] && !loading.has(SPORTS[i].gid));
+
+  // Still waiting on data
+  if (!rows.length && stillLoading) {
+    syncRow.style.display = "none";
+    showPanel(`<div class="state-msg"><div class="spinner"></div>
+      <p>Loading schedule from Google Sheets…</p></div>`);
+    return;
+  }
+
+  // Failed to load
+  if (!rows.length && allFailed) {
+    syncRow.style.display = "none";
+    showPanel(`<div class="error-box">
+      <h3>⚠️ Could not load schedule</h3>
+      <p>The scheduler couldn't fetch data from Google Sheets. This usually means:</p>
+      <ul style="margin:.5rem 0 .5rem 1.25rem;line-height:1.8;font-size:13px">
+        <li>The Google Sheet is not published to web (File → Share → Publish to web)</li>
+        <li>A temporary network issue — try refreshing</li>
+      </ul>
+      <div class="btn-row">
+        <button class="retry-btn" onclick="hardRefresh()">Retry</button>
+        <button class="retry-btn" style="background:var(--gray-dk)" onclick="showDebug()">Debug Log</button>
+      </div>
+    </div>`);
+    return;
+  }
+
+  // No games match the filter
+  if (!rows.length) {
+    syncRow.style.display = "none";
+    showPanel(`<div class="state-msg">
+      <p>No upcoming games found${filterWorker ? " for <strong>" + esc(filterWorker) + "</strong>" : ""}.</p>
+    </div>`);
+    return;
+  }
+
+  // Render content
+  showPanel(viewMode === "card" ? renderCards(rows) : renderTable(rows));
+
+  // Sync row
+  syncRow.style.display = "flex";
+  document.getElementById("syncTime").textContent =
+    "Synced from Google Sheets at " +
+    new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
+/* ── CARD VIEW ── */
+function renderCards(rows) {
+  // Group by sport
+  const grouped = {};
+  rows.forEach(({ game: g, data }) => {
+    if (!grouped[g.sport]) grouped[g.sport] = { data, games: [] };
+    grouped[g.sport].games.push(g);
+  });
+
+  const multi = Object.keys(grouped).length > 1;
+  let html = "";
+
+  Object.entries(grouped).forEach(([sport, { data, games }]) => {
+    if (multi) html += `<div class="sec-label"><span class="${sportChipClass(sport)}">${esc(sport)}</span></div>`;
+
+    games.forEach(g => {
+      const gt      = parseTime(g.time);
+      const hasMine = filterWorker && Object.values(g.workers).includes(filterWorker);
+      const posList = filterWorker
+        ? data.positions.filter(p => g.workers[p] === filterWorker)
+        : data.positions;
+
+      html += `<div class="game-card${hasMine ? " has-mine" : ""}">
+        <div class="gc-head${hasMine ? " has-mine" : ""}">
+          <span class="gc-opp">vs. ${esc(g.opp)}</span>
+          <span class="gc-meta">${esc(fmtDate(g.date))}${gt ? " &nbsp;·&nbsp; Game: " + fmtTime(gt.h, gt.m) : g.time ? " &nbsp;·&nbsp; " + esc(g.time) : ""}</span>
+        </div>
+        <div class="gc-body">
+          ${posList.map(pos => {
+            const worker = g.workers[pos] || "";
+            const mins   = data.arrivalMins[pos];
+            const mine   = filterWorker && worker === filterWorker;
+            let tHtml = "";
+            if (gt !== null && mins != null) {
+              const at = arriveAt(gt.h, gt.m, mins);
+              tHtml = `<div class="ac-time">${fmtTime(at.h, at.m)}</div>
+                       <div class="ac-badge"><span class="badge ${badgeClass(mins)}">${mins} min early</span></div>`;
+            } else if (gt === null) {
+              tHtml = `<div class="ac-time tbd">Game time TBD</div>`;
+            } else {
+              tHtml = `<div class="ac-time tbd">No arrival time set</div>`;
+            }
+            return `<div class="ac${mine ? " mine" : ""}">
+              <div class="ac-pos">${esc(pos)}</div>
+              <div class="ac-name${worker ? "" : " un"}">${worker ? esc(worker) : "Unassigned"}</div>
+              ${tHtml}
+            </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+    });
+  });
+  return html || `<div class="state-msg"><p>No games found.</p></div>`;
+}
+
+/* ── TABLE VIEW ── */
+function renderTable(rows) {
+  const grouped = {};
+  rows.forEach(({ game: g, data }) => {
+    if (!grouped[g.sport]) grouped[g.sport] = { data, games: [] };
+    grouped[g.sport].games.push(g);
+  });
+
+  const multi = Object.keys(grouped).length > 1;
+  let html = "";
+
+  Object.entries(grouped).forEach(([sport, { data, games }]) => {
+    if (multi) html += `<div class="sec-label"><span class="${sportChipClass(sport)}">${esc(sport)}</span></div>`;
+
+    let trows = "";
+    games.forEach(g => {
+      const gt = parseTime(g.time);
+      const posList = filterWorker
+        ? data.positions.filter(p => g.workers[p] === filterWorker)
+        : data.positions;
+      if (!posList.length) return;
+
+      posList.forEach((pos, pi) => {
+        const worker = g.workers[pos] || "";
+        const mins   = data.arrivalMins[pos];
+        const mine   = filterWorker && worker === filterWorker;
+
+        let arrStr = "TBD", arrCls = "td-arr tbd";
+        if (gt !== null && mins != null) {
+          const at = arriveAt(gt.h, gt.m, mins);
+          arrStr   = fmtTime(at.h, at.m);
+          arrCls   = "td-arr" + (mine ? " mine-t" : "");
+        }
+
+        // In no-worker-filter mode, only show the game cell on the first position row
+        const showGame = !filterWorker ? pi === 0 : true;
+
+        trows += `<tr class="${mine ? "mine-row" : ""}">
+          <td>${showGame
+            ? `<div class="td-opp">${esc(g.opp)}</div>
+               <div class="td-sub">${esc(fmtDate(g.date))}${g.time && g.time !== "TBD" ? " · " + esc(g.time) : ""}</div>`
+            : "&nbsp;"}</td>
+          <td class="td-pos">${esc(pos)}</td>
+          <td class="td-wk${worker ? "" : " un"}">${worker ? esc(worker) : "Unassigned"}</td>
+          <td class="${arrCls}">${arrStr}</td>
+          <td>${mins != null ? `<span class="badge ${badgeClass(mins)}">${mins} min early</span>` : ""}</td>
+        </tr>`;
+      });
+    });
+
+    if (trows) {
+      html += `<div class="tbl-wrap">
+        <table class="sched-tbl">
+          <thead>
+            <tr><th>Game</th><th>Position</th><th>Worker</th><th>Arrive By</th><th>Lead</th></tr>
+          </thead>
+          <tbody>${trows}</tbody>
+        </table>
+      </div>`;
+    }
+  });
+  return html || `<div class="state-msg"><p>No games found.</p></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DEBUG
+   ═══════════════════════════════════════════════════════ */
+function showDebug() {
+  showPanel(`
+    <div style="font-family:var(--fd);font-size:13px;font-weight:700;text-transform:uppercase;margin-bottom:.75rem">Debug Log</div>
+    <div class="debug-box">${esc(dbgLog.join("\n"))}</div>
+    <div style="margin-top:.875rem;display:flex;gap:8px">
+      <button class="retry-btn" onclick="hardRefresh()">Retry</button>
+      <button class="retry-btn" style="background:var(--gray-dk)" onclick="render()">Back</button>
+    </div>`);
+}
+
+/* ═══════════════════════════════════════════════════════
+   REFRESH
+   ═══════════════════════════════════════════════════════ */
+function hardRefresh() {
+  cache = {}; allWorkers = new Set(); dbgLog = [];
+  populateWorkerDropdown();
+  loadAll();
+}
+
+// Auto-refresh every 5 minutes
+setInterval(() => {
+  log("Auto-refresh triggered");
+  cache = {}; allWorkers = new Set();
+  loadAll();
+}, 5 * 60 * 1000);
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════ */
+populateSportDropdown();
+loadAll(); // pre-load all sheets in background so worker dropdown populates
+
+</script>
+</body>
+</html>
