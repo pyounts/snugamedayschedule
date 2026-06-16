@@ -411,9 +411,11 @@ function esc(s) {
 function dateMs(raw) {
   if (!raw) return Infinity;
   var s = String(raw).trim();
+  // Strip a trailing time component if present, e.g. "8/27/2026 0:00:00" -> "8/27/2026"
+  s = s.replace(/\s+\d{1,2}:\d{2}(:\d{2})?\s*(AM|PM)?$/i, "").trim();
   var m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
   if (m) { var yr = +m[3]; if (yr < 100) yr += 2000; return new Date(yr, +m[1]-1, +m[2]).getTime(); }
-  m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (m) return new Date(+m[1], +m[2]-1, +m[3]).getTime();
   // Last resort: let the browser try to parse it natively
   var native = new Date(s);
@@ -423,16 +425,17 @@ function dateMs(raw) {
 
 function fmtDate(raw) {
   if (!raw) return "";
-  var m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  var s = String(raw).trim().replace(/\s+\d{1,2}:\d{2}(:\d{2})?\s*(AM|PM)?$/i, "").trim();
+  var m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
   if (m) {
     var yr = +m[3]; if (yr < 100) yr += 2000;
     return new Date(yr, +m[1]-1, +m[2]).toLocaleDateString("en-US",
       {weekday:"short",month:"short",day:"numeric",year:"numeric"});
   }
-  m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (m) return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString("en-US",
     {weekday:"short",month:"short",day:"numeric",year:"numeric"});
-  return raw;
+  return s;
 }
 
 function isPast(raw) {
@@ -634,9 +637,24 @@ function render() {
 
   if (!rows.length) {
     syncRow.style.display = "none";
+    // Build a quick diagnostic: show what raw dates were actually found
+    var diag = [];
+    for (var di=0; di<idxs.length; di++) {
+      var ddata = cache[SPORTS[idxs[di]].gid];
+      if (!ddata) continue;
+      diag.push(SPORTS[idxs[di]].label + ": " + ddata.games.length + " total rows parsed");
+      for (var dgi=0; dgi<Math.min(ddata.games.length,3); dgi++) {
+        var dg = ddata.games[dgi];
+        diag.push("&nbsp;&nbsp;→ date=\"" + esc(dg.date) + "\" parsed=" + dateMs(dg.date) + " isPast=" + isPast(dg.date) + " opp=" + esc(dg.opp));
+      }
+    }
     setPanel('<div class="state-msg"><p>No upcoming games found' +
       (filterWorker ? ' for <strong>'+esc(filterWorker)+'</strong>' : '') +
-      '.</p></div>');
+      '.</p></div>' +
+      '<div style="margin-top:1rem;padding:1rem;background:var(--gray-lt);border-radius:var(--r);font-size:12px;text-align:left">' +
+      '<strong>Diagnostic info</strong><br>' + diag.join('<br>') +
+      '</div>' +
+      '<div style="margin-top:.75rem"><button class="retry-btn" onclick="showDebug()">Full Debug Log</button></div>');
     return;
   }
 
