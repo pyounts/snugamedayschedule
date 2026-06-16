@@ -410,10 +410,14 @@ function esc(s) {
 
 function dateMs(raw) {
   if (!raw) return Infinity;
-  var m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  var s = String(raw).trim();
+  var m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
   if (m) { var yr = +m[3]; if (yr < 100) yr += 2000; return new Date(yr, +m[1]-1, +m[2]).getTime(); }
-  m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (m) return new Date(+m[1], +m[2]-1, +m[3]).getTime();
+  // Last resort: let the browser try to parse it natively
+  var native = new Date(s);
+  if (!isNaN(native.getTime())) return native.getTime();
   return Infinity;
 }
 
@@ -636,8 +640,14 @@ function render() {
     return;
   }
 
-  // Sort all rows by date
-  rows.sort(function(a,b){ return dateMs(a.game.date)-dateMs(b.game.date); });
+  // Sort all rows by date, with a stable secondary sort by opponent name
+  // so ties (same date) don't shuffle between renders.
+  rows.sort(function(a,b){
+    var da = dateMs(a.game.date), db = dateMs(b.game.date);
+    if (da !== db) return da - db;
+    return (a.game.opp || "").localeCompare(b.game.opp || "");
+  });
+  log("Render order: " + rows.map(function(r){ return r.game.date+" "+r.game.sport+" vs "+r.game.opp; }).join(" | "));
 
   setPanel(viewMode==="card" ? buildCards(rows) : buildTable(rows));
 
