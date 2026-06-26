@@ -746,7 +746,7 @@ function cardHtml(rowObj, showSportChip) {
     if (gt !== null && mins != null) {
       var at = arriveAt(gt.h, gt.m, mins);
       html += '<div class="ac-time">'+fmtTime(at.h,at.m)+'</div>';
-      html += '<div class="ac-badge"><span class="badge '+badgeCls(mins)+'">'+mins+' min early</span></div>';
+      var badgeText; if (mins > 0) {   badgeText = mins + " min early"; } else if (mins < 0) {   badgeText = Math.abs(mins) + " min after start"; } else {   badgeText = "At game time"; }  html += '<div class="ac-badge"><span class="badge '+badgeCls(mins)+'">'+badgeText+'</span></div>';
     } else if (gt === null) {
       html += '<div class="ac-time tbd">Game time TBD</div>';
     } else {
@@ -792,7 +792,7 @@ function buildTable(rows) {
         trows += '<td class="td-pos">'+esc(pos)+'</td>';
         trows += '<td class="td-wk">'+esc(worker)+'</td>';
         trows += '<td class="'+arrCls+'">'+arrStr+'</td>';
-        trows += '<td>'+(mins!=null?'<span class="badge '+badgeCls(mins)+'">'+mins+' min early</span>':'')+'</td>';
+        trows += '<td>'+(mins!=null?(function() {   if (mins > 0) return '<span class="badge '+badgeCls(mins)+'">'+mins+' min early</span>';   if (mins < 0) return '<span class="badge '+badgeCls(mins)+'">'+Math.abs(mins)+' min after start</span>';   return '<span class="badge '+badgeCls(mins)+'">At game time</span>'; })():'')+'</td>';
         trows += '</tr>';
       }
     }
@@ -842,7 +842,7 @@ function buildTable(rows) {
           trows2 += '<td class="td-pos">'+esc(pos3)+'</td>';
           trows2 += '<td class="td-wk'+(worker3?"":" un")+'">'+(worker3?esc(worker3):"Unassigned")+'</td>';
           trows2 += '<td class="'+arrCls3+'">'+arrStr3+'</td>';
-          trows2 += '<td>'+(mins3!=null?'<span class="badge '+badgeCls(mins3)+'">'+mins3+' min early</span>':'')+'</td>';
+          trows2 += '<td>'+(mins3!=null?(function() {   if (mins3 > 0) return '<span class="badge '+badgeCls(mins3)+'">'+mins3+' min early</span>';   if (mins3 < 0) return '<span class="badge '+badgeCls(mins3)+'">'+Math.abs(mins3)+' min after start</span>';   return '<span class="badge '+badgeCls(mins3)+'">At game time</span>'; })():'')+'</td>';
           trows2 += '</tr>';
         }
       }
