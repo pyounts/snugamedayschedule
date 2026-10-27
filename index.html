@@ -674,11 +674,24 @@ function render() {
     return;
   }
 
-  // Sort all rows by date, with a stable secondary sort by opponent name
-  // so ties (same date) don't shuffle between renders.
+  // Sort by date, then game time, then opponent name.
+  // This ensures multiple games on the same date appear chronologically.
   rows.sort(function(a,b){
     var da = dateMs(a.game.date), db = dateMs(b.game.date);
     if (da !== db) return da - db;
+
+    var ta = parseTime(a.game.time);
+    var tb = parseTime(b.game.time);
+    if (ta && tb) {
+      var minutesA = ta.h * 60 + ta.m;
+      var minutesB = tb.h * 60 + tb.m;
+      if (minutesA !== minutesB) return minutesA - minutesB;
+    } else if (ta && !tb) {
+      return -1;
+    } else if (!ta && tb) {
+      return 1;
+    }
+
     return (a.game.opp || "").localeCompare(b.game.opp || "");
   });
   log("Render order: " + rows.map(function(r){ return r.game.date+" "+r.game.sport+" vs "+r.game.opp; }).join(" | "));
