@@ -319,8 +319,17 @@ function parseSheet(text, sportLabel) {
     if (/^-+$/.test(opp) || /^opponent$/i.test(opp) || /^date$/i.test(date)) continue;
 
     var workers = {};
+    var ignoredPositions = {};
     for (var wi = 0; wi < positions.length; wi++) {
       var name = (row[3 + wi] || "").trim();
+
+      // N/A means this position is not needed for this particular game.
+      // Do not add it to the worker list and do not display the position.
+      if (/^N\/A$/i.test(name)) {
+        ignoredPositions[positions[wi]] = true;
+        continue;
+      }
+
       if (name) {
         workers[positions[wi]] = name;
         if (!workerSet[name]) {
@@ -330,7 +339,14 @@ function parseSheet(text, sportLabel) {
         }
       }
     }
-    games.push({ date: date, time: time, opp: opp, workers: workers, sport: sportLabel });
+    games.push({
+      date: date,
+      time: time,
+      opp: opp,
+      workers: workers,
+      ignoredPositions: ignoredPositions,
+      sport: sportLabel
+    });
   }
   log(sportLabel + ": " + games.length + " games");
   return { positions: positions, arrivalMins: arrivalMins, games: games, sport: sportLabel };
@@ -714,6 +730,7 @@ function cardHtml(rowObj, showSportChip) {
   var posList = [];
   for (var pi=0; pi<data.positions.length; pi++) {
     var pos = data.positions[pi];
+    if (g.ignoredPositions && g.ignoredPositions[pos]) continue;
     if (!filterWorker || g.workers[pos]===filterWorker) posList.push(pos);
   }
   if (!posList.length) return "";
@@ -772,7 +789,9 @@ function buildTable(rows) {
       var gt   = parseTime(g.time);
       var pList = [];
       for (var pi=0; pi<data.positions.length; pi++) {
-        if (g.workers[data.positions[pi]]===filterWorker) pList.push(data.positions[pi]);
+        var p = data.positions[pi];
+        if (g.ignoredPositions && g.ignoredPositions[p]) continue;
+        if (g.workers[p]===filterWorker) pList.push(p);
       }
       for (var pi2=0; pi2<pList.length; pi2++) {
         var pos    = pList[pi2];
@@ -823,8 +842,10 @@ function buildTable(rows) {
         var g2   = grp[gi].game;
         var d2   = grp[gi].data;
         var gt2  = parseTime(g2.time);
+        var displayedPositions = 0;
         for (var pi3=0; pi3<d2.positions.length; pi3++) {
-          var pos3   = d2.positions[pi3];
+          var pos3 = d2.positions[pi3];
+          if (g2.ignoredPositions && g2.ignoredPositions[pos3]) continue;
           var worker3= g2.workers[pos3]||"";
           var mins3  = d2.arrivalMins[pos3];
           var arrStr3="TBD", arrCls3="td-arr tbd";
@@ -832,7 +853,8 @@ function buildTable(rows) {
             var at3=arriveAt(gt2.h,gt2.m,mins3);
             arrStr3=fmtTime(at3.h,at3.m); arrCls3="td-arr";
           }
-          var showG = pi3===0;
+          var showG = displayedPositions===0;
+          displayedPositions++;
           trows2 += '<tr>';
           trows2 += '<td>'+(showG
             ? '<div class="td-opp">'+esc(g2.opp)+'</div><div class="td-sub">'+esc(fmtDate(g2.date))+
